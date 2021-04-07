@@ -1,4 +1,4 @@
-package io.github.yeffycodegit;
+package io.github.yeffycodegit.Y;
 
 public class Token {
     final TokenTypes type;

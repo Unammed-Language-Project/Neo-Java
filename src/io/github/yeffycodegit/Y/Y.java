@@ -1,4 +1,6 @@
-package io.github.yeffycodegit;
+package io.github.yeffycodegit.Y;
+
+import io.github.yeffycodegit.Expr;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,7 +11,10 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class Y {
+    private static final Interpreter interpreter = new Interpreter();
+
     private static boolean hadError;
+    static boolean hadRuntimeError;
 
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
@@ -47,6 +52,11 @@ public class Y {
         report(line, "", message);
     }
 
+    static void runtimeError(RuntimeError error) {
+        System.err.println(error.getMessage() + "\n[line " + error.token.line + "]");
+        hadRuntimeError = true;
+    }
+
     private static void report(int line, String where, String message) {
         System.err.println("[line " + line + "] Error" + where + ": " + message);
         hadError = true;
@@ -55,7 +65,11 @@ public class Y {
     private static void run(String source) {
         Lexer lexer = new Lexer(source);
         List<Token> tokens = lexer.scanTokens();
-        prettyPrint(tokens);
+
+        Parser parser = new Parser(tokens);
+        Expr expression = parser.parse();
+
+        interpreter.interpret(expression);
     }
 
     private static void prettyPrint(List<Token> tokens) {

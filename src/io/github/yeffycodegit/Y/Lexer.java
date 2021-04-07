@@ -1,11 +1,11 @@
-package io.github.yeffycodegit;
+package io.github.yeffycodegit.Y;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.github.yeffycodegit.TokenTypes.*;
+import static io.github.yeffycodegit.Y.TokenTypes.*;
 
 public class Lexer {
     private final String source;
@@ -21,7 +21,7 @@ public class Lexer {
         keywords.put("for",    FOR);
         keywords.put("fun",    FUN);
         keywords.put("if",     IF);
-        keywords.put("null",    NIL);
+        keywords.put("null",    NULL);
         keywords.put("or",     OR);
         keywords.put("print",  PRINT);
         keywords.put("return", RETURN);
