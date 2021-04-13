@@ -1,6 +1,6 @@
 package io.github.yeffycodegit.Y;
 
-import io.github.yeffycodegit.Expr;
+import io.github.yeffycodegit.Stmt;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -43,6 +43,11 @@ public class Y {
         for (;;) {
             System.out.print("> ");
             String line = reader.readLine();
+            if (line == "exit") {
+                System.out.println("Exiting repl..");
+                return;
+            }
+
             if (line == null) break;
             run(line);
         }
@@ -52,26 +57,45 @@ public class Y {
         report(line, "", message);
     }
 
+    /**
+     * Function to report errors during runtime
+     *
+     * @param: error
+     */
     static void runtimeError(RuntimeError error) {
         System.err.println(error.getMessage() + "\n[line " + error.token.line + "]");
         hadRuntimeError = true;
     }
 
+    /**
+     * Function to report errors
+     * */
     private static void report(int line, String where, String message) {
         System.err.println("[line " + line + "] Error" + where + ": " + message);
         hadError = true;
     }
 
+    /**
+     * Function to compile Y code
+     *
+     * @param source The source code to compile
+     */
     private static void run(String source) {
         Lexer lexer = new Lexer(source);
         List<Token> tokens = lexer.scanTokens();
 
         Parser parser = new Parser(tokens);
-        Expr expression = parser.parse();
+        List<Stmt> statements = parser.parse();
 
-        interpreter.interpret(expression);
+        if (hadError) return;
+        interpreter.interpret(statements);
     }
 
+    /**
+     * Function to print all the tokens given in a nice manner. Will be used as a debugging tool if I need to check if the tokenization is broken.
+     *
+     * @param tokens The list of tokens, returned from the Lexer
+     */
     private static void prettyPrint(List<Token> tokens) {
         for(Token token : tokens) {
             System.out.println("[" + token.type + " : " + token.lexeme + "]");

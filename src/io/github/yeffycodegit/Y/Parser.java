@@ -1,7 +1,9 @@
 package io.github.yeffycodegit.Y;
 
 import io.github.yeffycodegit.Expr;
+import io.github.yeffycodegit.Stmt;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static io.github.yeffycodegit.Y.TokenTypes.*;
@@ -47,19 +49,24 @@ public class Parser {
         if (isAtEnd()) return false;
         return peek().type == type;
     }
+
     private Token advance() {
         if (!isAtEnd()) current++;
         return previous();
     }
+
     private boolean isAtEnd() {
         return peek().type == EOF;
     }
+
     private Token peek() {
         return tokens.get(current);
     }
+
     private Token previous() {
         return tokens.get(current - 1);
     }
+
     private Expr comparison() {
         Expr expr = term();
 
@@ -71,6 +78,7 @@ public class Parser {
 
         return expr;
     }
+
     private Expr term() {
         Expr expr = factor();
 
@@ -82,6 +90,7 @@ public class Parser {
 
         return expr;
     }
+
     private Expr factor() {
         Expr expr = unary();
 
@@ -93,6 +102,7 @@ public class Parser {
 
         return expr;
     }
+
     private Expr unary() {
         if (match(BANG, MINUS)) {
             Token operator = previous();
@@ -124,10 +134,12 @@ public class Parser {
 
         throw error(peek(), message);
     }
+
     private ParseError error(Token token, String message) {
         Y.error(token.line, message);
         return new ParseError();
     }
+
     private void synchronize() {
         advance();
 
@@ -149,11 +161,31 @@ public class Parser {
             advance();
         }
     }
-    Expr parse() {
-        try {
-            return expression();
-        } catch (ParseError error) {
-            return null;
+
+    private Stmt statement() {
+        if (match(PRINT)) return printStatement();
+
+        return expressionStatement();
+    }
+
+    private Stmt printStatement() {
+        Expr value = expression();
+        consume(SEMICOLON, "Expect ';' after value.");
+        return new Stmt.Print(value);
+    }
+
+    private Stmt expressionStatement() {
+        Expr expr = expression();
+        consume(SEMICOLON, "Expect ';' after expression.");
+        return new Stmt.Expression(expr);
+    }
+
+    List<Stmt> parse() {
+        List<Stmt> statements = new ArrayList<>();
+        while (!isAtEnd()) {
+            statements.add(statement());
         }
+
+        return statements;
     }
 }

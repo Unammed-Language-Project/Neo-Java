@@ -10,11 +10,17 @@ public class GenerateAst {
     public static void main(String[] args) throws IOException {
         String outputDir = "C:\\Users\\aditc\\Desktop\\Y#\\src\\io\\github\\yeffycodegit\\";
 
-        defineAst(outputDir, "Expr", Arrays.asList(
-                "Binary   : Expr left, Token operator, Expr right",
-                "Grouping : Expr expression",
-                "Literal  : Object value",
-                "Unary    : Token operator, Expr right"
+
+         defineAst(outputDir, "Expr", Arrays.asList(
+                 "Binary   : Expr left, Token operator, Expr right",
+                 "Grouping : Expr expression",
+                 "Literal  : Object value",
+                 "Unary    : Token operator, Expr right"
+         ));
+
+        defineAst(outputDir, "Stmt", Arrays.asList(
+                "Expression : Expr expression",
+                "Print      : Expr expression"
         ));
     }
 
@@ -52,6 +58,7 @@ public class GenerateAst {
 
         // Store parameters in fields.
         String[] fields = fieldList.split(", ");
+
         for (String field : fields) {
             String name = field.split(" ")[1];
             writer.println("      this." + name + " = " + name + ";");
