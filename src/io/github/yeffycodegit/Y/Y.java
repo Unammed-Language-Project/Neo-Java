@@ -1,7 +1,5 @@
 package io.github.yeffycodegit.Y;
 
-import io.github.yeffycodegit.Stmt;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -17,14 +15,7 @@ public class Y {
     static boolean hadRuntimeError;
 
     public static void main(String[] args) throws IOException {
-        if (args.length > 1) {
-            System.out.println("Usage: y [script path]");
-            System.exit(64);
-        } else if (args.length == 1) {
-            runFile(args[0]);
-        } else {
-            runPrompt(); // Run the Y REPL
-        }
+       runFile("C:\\Users\\aditc\\Desktop\\Y#\\src\\hehe.ys");
     }
 
     private static void runFile(String path) throws IOException {

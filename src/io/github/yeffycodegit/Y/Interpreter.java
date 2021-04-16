@@ -1,47 +1,48 @@
 package io.github.yeffycodegit.Y;
-
-import io.github.yeffycodegit.Expr;
-import io.github.yeffycodegit.Stmt;
-
 import java.util.List;
 
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
+
+    private Enviorment environment = new Enviorment();
+
     @Override
     public Object visitBinaryExpr(Expr.Binary expr) {
         Object left = evaluate(expr.left);
         Object right = evaluate(expr.right);
 
         switch (expr.operator.type) {
-            case BANG_EQUAL: return !isEqual(left, right);
-            case EQUAL_EQUAL: return isEqual(left, right);
+            case BANG_EQUAL:
+                return !isEqual(left, right);
+            case EQUAL_EQUAL:
+                return isEqual(left, right);
             case GREATER:
                 checkNumberOperands(expr.operator, left, right);
-                return (double)left > (double)right;
+                return (double) left > (double) right;
             case GREATER_EQUAL:
                 checkNumberOperands(expr.operator, left, right);
-                return (double)left >= (double)right;
+                return (double) left >= (double) right;
             case LESS:
                 checkNumberOperands(expr.operator, left, right);
-                return (double)left < (double)right;
+                return (double) left < (double) right;
             case LESS_EQUAL:
                 checkNumberOperands(expr.operator, left, right);
-                return (double)left <= (double)right;
+                return (double) left <= (double) right;
             case MINUS:
                 checkNumberOperands(expr.operator, left, right);
-                return (double)left - (double)right;
+                return (double) left - (double) right;
             case SLASH:
                 checkNumberOperands(expr.operator, left, right);
-                return (double)left / (double)right;
+                return (double) left / (double) right;
             case STAR:
                 checkNumberOperands(expr.operator, left, right);
-                return (double)left * (double)right;
+                return (double) left * (double) right;
             case PLUS:
                 if (left instanceof Double && right instanceof Double) {
-                    return (double)left + (double)right;
+                    return (double) left + (double) right;
                 }
 
                 if (left instanceof String && right instanceof String) {
-                    return (String)left + (String)right;
+                    return (String) left + (String) right;
                 }
 
                 throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");
@@ -81,6 +82,12 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     private boolean isTrue(Object object) {
+        if (object == null) return false;
+        if (object instanceof Boolean) return (boolean)object;
+        return true;
+    }
+
+    private boolean isTruthy(Object object) {
         if (object == null) return false;
         if (object instanceof Boolean) return (boolean)object;
         return true;
@@ -132,6 +139,20 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         return object.toString();
     }
 
+
+    void executeBlock(List<Stmt> statements, Enviorment environment) {
+        Enviorment previous = this.environment;
+        try {
+            this.environment = environment;
+
+            for (Stmt statement : statements) {
+                execute(statement);
+            }
+        } finally {
+            this.environment = previous;
+        }
+    }
+
     @Override
     public Void visitExpressionStmt(Stmt.Expression stmt) {
         evaluate(stmt.expression);
@@ -144,4 +165,62 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         System.out.println(stringify(value));
         return null;
     }
+
+    @Override
+    public Void visitWhileStmt(Stmt.While stmt) {
+        return null;
+    }
+
+    @Override
+    public Void visitVarStmt(Stmt.Var stmt) {
+        Object value = null;
+        if (stmt.initializer != null) {
+            value = evaluate(stmt.initializer);
+        }
+
+        environment.define(stmt.name.lexeme, value);
+        return null;
+    }
+
+    @Override
+    public Object visitVariableExpr(Expr.Variable expr) {
+        return environment.get(expr.name);
+    }
+
+    @Override
+    public Object visitAssignExpr(Expr.Assign expr) {
+        Object value = evaluate(expr.value);
+        environment.assign(expr.name, value);
+        return value;
+    }
+
+    @Override
+    public Void visitBlockStmt(Stmt.Block stmt) {
+        executeBlock(stmt.statements, new Enviorment(environment));
+        return null;
+    }
+
+    @Override
+    public Void visitIfStmt(Stmt.If stmt) {
+        if (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.thenBranch);
+        } else if (stmt.elseBranch != null) {
+            execute(stmt.elseBranch);
+        }
+        return null;
+    }
+
+    @Override
+    public Object visitLogicalExpr(Expr.Logical expr) {
+        Object left = evaluate(expr.left);
+
+        if (expr.operator.type == TokenTypes.OR) {
+            if (isTruthy(left)) return left;
+        } else {
+            if (!isTruthy(left)) return left;
+        }
+
+        return evaluate(expr.right);
+    }
+
 }

@@ -1,0 +1,9 @@
+var x = 100;
+
+if (x == 10) {
+  print "X is equal to a hundred";
+}
+
+if (x == 100) {
+  print "X is equal to a 100";
+}

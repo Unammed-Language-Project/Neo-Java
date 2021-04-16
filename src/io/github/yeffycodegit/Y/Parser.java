@@ -1,8 +1,5 @@
 package io.github.yeffycodegit.Y;
 
-import io.github.yeffycodegit.Expr;
-import io.github.yeffycodegit.Stmt;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +16,7 @@ public class Parser {
     }
 
     private Expr expression() {
-        return equality();
+        return assignment();
     }
 
     private Expr equality() {
@@ -112,14 +109,15 @@ public class Parser {
 
         return primary();
     }
+
     private Expr primary() {
         if (match(FALSE)) return new Expr.Literal(false);
         if (match(TRUE)) return new Expr.Literal(true);
         if (match(NULL)) return new Expr.Literal(null);
 
-        if (match(NUMBER, STRING)) {
-            return new Expr.Literal(previous().literal);
-        }
+        if (match(NUMBER, STRING)) return new Expr.Literal(previous().literal);
+
+        if (match(IDENTIFIER)) return new Expr.Variable(previous());
 
         if (match(LEFT_PAREN)) {
             Expr expr = expression();
@@ -129,6 +127,7 @@ public class Parser {
 
         throw error(peek(), "Expect expression.");
     }
+
     private Token consume(TokenTypes type, String message) {
         if (check(type)) return advance();
 
@@ -162,8 +161,35 @@ public class Parser {
         }
     }
 
+    private Expr or() {
+        Expr expr = and();
+
+        while (match(OR)) {
+            Token operator = previous();
+            Expr right = and();
+            expr = new Expr.Logical(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expr and() {
+        Expr expr = equality();
+
+        while (match(AND)) {
+            Token operator = previous();
+            Expr right = equality();
+            expr = new Expr.Logical(expr, operator, right);
+        }
+
+        return expr;
+    }
+
     private Stmt statement() {
+        if (match(IF)) return ifStatement();
         if (match(PRINT)) return printStatement();
+        if (match(WHILE)) return whileStatement();
+        if (match(LEFT_BRACE)) return new Stmt.Block(block());
 
         return expressionStatement();
     }
@@ -174,18 +200,93 @@ public class Parser {
         return new Stmt.Print(value);
     }
 
+    private Stmt ifStatement() {
+        consume(LEFT_PAREN, "Expect '(' after 'if'.");
+        Expr condition = expression();
+        consume(RIGHT_PAREN, "Expect ')' after if condition.");
+
+        Stmt thenBranch = statement();
+        Stmt elseBranch = null;
+        if (match(ELSE)) {
+            elseBranch = statement();
+        }
+
+        return new Stmt.If(condition, thenBranch, elseBranch);
+    }
+
     private Stmt expressionStatement() {
         Expr expr = expression();
         consume(SEMICOLON, "Expect ';' after expression.");
         return new Stmt.Expression(expr);
     }
 
+    private Stmt whileStatement() {
+        consume(LEFT_PAREN, "Expect '(' after 'while'.");
+        Expr condition = expression();
+        consume(RIGHT_PAREN, "Expect ')' after condition.");
+        Stmt body = statement();
+
+        return new Stmt.While(condition, body);
+    }
+
     List<Stmt> parse() {
         List<Stmt> statements = new ArrayList<>();
         while (!isAtEnd()) {
-            statements.add(statement());
+            statements.add(declaration());
         }
 
+        return statements;
+    }
+
+    private Stmt declaration() {
+        try {
+            if (match(VAR)) return varDeclaration();
+
+            return statement();
+        } catch (ParseError error) {
+            synchronize();
+            return null;
+        }
+    }
+
+    private Stmt varDeclaration() {
+        Token name = consume(IDENTIFIER, "Expect variable name.");
+
+        Expr initializer = null;
+        if (match(EQUAL)) {
+            initializer = expression();
+        }
+
+        consume(SEMICOLON, "Expect ';' after variable declaration.");
+        return new Stmt.Var(name, initializer);
+    }
+
+    private Expr assignment() {
+        Expr expr = or();
+
+        if (match(EQUAL)) {
+            Token equals = previous();
+            Expr value = assignment();
+
+            if (expr instanceof Expr.Variable) {
+                Token name = ((Expr.Variable)expr).name;
+                return new Expr.Assign(name, value);
+            }
+
+            error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
+    }
+
+    private List<Stmt> block() {
+        List<Stmt> statements = new ArrayList<>();
+
+        while (!check(RIGHT_BRACE) && !isAtEnd()) {
+            statements.add(declaration());
+        }
+
+        consume(RIGHT_BRACE, "Unterminated block statement");
         return statements;
     }
 }
