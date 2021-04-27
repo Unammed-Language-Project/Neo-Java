@@ -14,17 +14,17 @@ public class Lexer {
 
     static {
         keywords = new HashMap<>();
-        keywords.put("and",    AND);
+        keywords.put("&&",    AND);
         keywords.put("class",  CLASS);
         keywords.put("else",   ELSE);
         keywords.put("false",  FALSE);
         keywords.put("for",    FOR);
-        keywords.put("fun",    FUN);
+        keywords.put("func",    FUNC);
         keywords.put("if",     IF);
         keywords.put("null",    NULL);
-        keywords.put("or",     OR);
+        keywords.put("||",     OR);
         keywords.put("print",  PRINT);
-        keywords.put("return", RETURN);
+        keywords.put("ret", RETURN);
         keywords.put("super",  SUPER);
         keywords.put("this",   THIS);
         keywords.put("true",   TRUE);

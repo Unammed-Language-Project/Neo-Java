@@ -1,9 +1,26 @@
 package io.github.yeffycodegit.Y;
+import java.util.ArrayList;
 import java.util.List;
 
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
-    private Enviorment environment = new Enviorment();
+    final Enviorment globals = new Enviorment();
+    private Enviorment environment = globals;
+
+    Interpreter() {
+        globals.define("clock", new YCallable() {
+            @Override
+            public int arity() { return 0; }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                return (double)System.currentTimeMillis() / 1000.0;
+            }
+
+            @Override
+            public String toString() { return "<native fn>"; }
+        });
+    }
 
     @Override
     public Object visitBinaryExpr(Expr.Binary expr) {
@@ -176,6 +193,14 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitReturnStmt(Stmt.Return stmt) {
+        Object value = null;
+        if (stmt.value != null) value = evaluate(stmt.value);
+
+        throw new Return(value);
+    }
+
+    @Override
     public Void visitVarStmt(Stmt.Var stmt) {
         Object value = null;
         if (stmt.initializer != null) {
@@ -227,4 +252,32 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         return evaluate(expr.right);
     }
 
+    @Override
+    public Object visitCallExpr(Expr.Call expr) {
+        Object callee = evaluate(expr.callee);
+        YCallable function = (YCallable)callee;
+
+        List<Object> arguments = new ArrayList<>();
+        for (Expr argument : expr.arguments) {
+            arguments.add(evaluate(argument));
+        }
+
+        if (!(callee instanceof YCallable)) {
+            throw new RuntimeError(expr.paren, "Can only 'call' functions and classes.");
+        }
+
+        if (arguments.size() != function.arity()) {
+            throw new RuntimeError(expr.paren, "Expected " + function.arity() + " arguments but got " + arguments.size() + "arguments instead.");
+        }
+
+        return function.call(this, arguments);
+    }
+
+
+    @Override
+    public Void visitFunctionStmt(Stmt.Function stmt) {
+        YFunc function = new YFunc(stmt, environment);
+        environment.define(stmt.name.lexeme, function);
+        return null;
+    }
 }

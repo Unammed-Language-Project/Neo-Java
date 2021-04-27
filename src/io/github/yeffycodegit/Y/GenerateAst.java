@@ -13,6 +13,7 @@ public class GenerateAst {
 
          defineAst(outputDir, "Expr", Arrays.asList(
                  "Binary   : Expr left, Token operator, Expr right",
+                 "Call     : Expr callee, Token paren, List<Expr> arguments",
                  "Assign   : Token name, Expr value",
                  "Grouping : Expr expression",
                  "Literal  : Object value",
@@ -24,11 +25,12 @@ public class GenerateAst {
         defineAst(outputDir, "Stmt", Arrays.asList(
                 "Block      : List<Stmt> statements",
                 "Expression : Expr expression",
-                "If         : Expr condition, Stmt thenBranch," +
-                            " Stmt elseBranch",
+                "If         : Expr condition, Stmt thenBranch," + " Stmt elseBranch",
                 "Print      : Expr expression",
                 "While      : Expr condition, Stmt body",
-                "Var        : Token name, Expr initializer"
+                "Return     : Token keyword, Expr value",
+                "Var        : Token name, Expr initializer",
+                "Function   : Token name, List<Token> params," + " List<Stmt> body"
         ));
     }
 
