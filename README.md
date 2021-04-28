@@ -10,7 +10,7 @@ func add(var x, var y) {
    ret x + y;
 }
 
-print add();
+print add(2, 2); // This will output 4
 ```
 
 The language is in its very early stages, so any contributions are very welcome! To know more on how to contribute, check out **CONTRIBUTING.md**.
