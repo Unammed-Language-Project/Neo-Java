@@ -1,0 +1,5 @@
+func add(var x, var y) {
+     ret x + y;
+}
+
+print add(1, 2);

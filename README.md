@@ -1,11 +1,29 @@
-<h1 align="center">Y# Compiler</h1>
-<p>This repository is the official repository for Y# (the temporary name I gave the compiler). It contains the entire compiler.</p>
+## Neo
+_A simple, slow, interpreted language, written in Java._
 
-<h3 align-"center">How to run</h3>
-<p>To run Y# yourself, you need a few prerequisites. They are: </p>
-<ul>
- <li>Java 11 (Thats the version this is running on so can't guarantee anything for other versions)</li>
- <li>A Java IDE/Code Editor</li>
-</ul>
-<p>To run it, first run <code>git clone</code> to clone the repository. Then, cd into the repo and run Y.java! 
-Note: You can either pass a path to the program when you run it, or you can start the file without args to pop into a repl, where you can type in statements.</p>
+Neo is an interpreted language with a simple syntax, good for beginners to programming. It is written in the Java programming language, and is my ~~first~~ second crack at making a compiler/interpreter.
+
+An example of its syntax is shown below:
+
+```
+func add(var x, var y) {
+   ret x + y;
+}
+
+print add();
+```
+
+The language is in its very early stages, so any contributions are very welcome! To know more on how to contribute, check out **CONTRIBUTING.md**.
+
+## Using Neo
+I plan to have a proper installation system for Neo in the future, but for now, you need to set it up manually. 
+To set up Neo, you need some prerequisites. They are:
+- Java 11 or higher
+- Intellij Idea (a different editor like Netbeans or Eclipse will do fine, but I like Intellij the best)
+- Some basic knowledge of the command line
+- Git
+
+First, git clone this repository. Then, open up the folder with your IDE, and run `Neo.java`. This will first run a test program file, `hehe.neo`, then pop you into a REPL.
+
+## Repl commands
+Currently, there arent many REPL commands. In fact, there's only one command. That little command is `#exit`. This does exactly what you think it does, it exits the REPL. 
