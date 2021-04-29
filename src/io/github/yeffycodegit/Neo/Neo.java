@@ -24,7 +24,6 @@ public class Neo {
         byte[] bytes = Files.readAllBytes(Paths.get(path)); // Convert the file provided into a list of bytes
         run(new String(bytes, Charset.defaultCharset())); // Create a string with the bytes from the bytes array and pass it to the run method to run the program
 
-
         // Indicate an error in the exit code.
         if (hadError) System.exit(65);
 

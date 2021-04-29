@@ -168,7 +168,7 @@ public class Parser {
     }
 
     private ParseError error(Token token, String message) {
-        Y.error(token.line, message);
+        Neo.error(token.line, message);
         return new ParseError();
     }
 

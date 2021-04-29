@@ -100,7 +100,7 @@ public class Lexer {
                 } else if (isAlpha(c)) {
                     identifier();
                 } else {
-                    Y.error(line, "Unexpected character.");
+                    Neo.error(line, "Unexpected character.");
                 }
         }
     }
@@ -136,7 +136,7 @@ public class Lexer {
         }
 
         if (isAtEnd()) {
-            Y.error(line, "Unterminated string.");
+            Neo.error(line, "Unterminated string.");
             return;
         }
 

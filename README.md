@@ -25,5 +25,8 @@ To set up Neo, you need some prerequisites. They are:
 
 First, git clone this repository. Then, open up the folder with your IDE, and run `Neo.java`. This will first run a test program file, `hehe.neo`, then pop you into a REPL.
 
+## Neo Syntax
+I will make a proper wiki/tutorial website, but for no, you can check the NeoLang repository, which explains all the current features of the language and how they work. I'll try to keep it updated, but my memory is horrid so feel free to submit a pull request or issue on the repo to remind me!
+
 ## Repl commands
 Currently, there arent many REPL commands. In fact, there's only one command. That little command is `#exit`. This does exactly what you think it does, it exits the REPL. 
