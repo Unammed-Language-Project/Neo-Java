@@ -1,5 +1,12 @@
-func add(var x, var y) {
-     ret x + y;
+class Circle {
+  func constructor(var radius) {
+    this.radius = radius;
+  }
+
+  func rad() {
+     print this.radius;
+  }
 }
 
-print add(1, 2);
+var circle = Circle(100);
+circle.rad();

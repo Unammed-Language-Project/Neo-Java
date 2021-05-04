@@ -5,9 +5,11 @@ import java.util.List;
 public class NeoFunc implements NeoCallable {
     private final Stmt.Function declaration;
     private final Enviorment closure;
+    private final boolean isInitializer;
 
-    NeoFunc(Stmt.Function declaration, Enviorment closure) {
+    NeoFunc(Stmt.Function declaration, Enviorment closure, boolean isInitializer) {
         this.declaration = declaration;
+        this.isInitializer = isInitializer;
         this.closure = closure;
     }
 
@@ -26,15 +28,24 @@ public class NeoFunc implements NeoCallable {
         try {
             interpreter.executeBlock(declaration.body, environment);
         } catch (Return returnValue) {
+            if (isInitializer) return closure.getAt(0, "this");
+
             return returnValue.value;
         }
 
+        if (isInitializer) return closure.getAt(0, "this");
 
         return null;
     }
 
+    NeoFunc bind(NeoInstance instance) {
+        Enviorment environment = new Enviorment(closure);
+        environment.define("this", instance);
+        return new NeoFunc(declaration, environment, isInitializer);
+    }
+
     @Override
     public String toString() {
-        return "<fn " + declaration.name.lexeme + ">";
+        return "<fn> " + declaration.name.lexeme + "</fn>";
     }
 }

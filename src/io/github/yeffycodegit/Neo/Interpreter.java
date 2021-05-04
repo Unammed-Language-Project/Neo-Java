@@ -1,10 +1,13 @@
 package io.github.yeffycodegit.Neo;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     final Enviorment globals = new Enviorment();
+    private final Map<Expr, Integer> locals = new HashMap<>();
     private Enviorment environment = globals;
 
     Interpreter() {
@@ -85,7 +88,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
         switch (expr.operator.type) {
             case BANG:
-                return !isTrue(right);
+                return !isTruthy(right);
             case MINUS:
                 return -(double)right;
         }
@@ -96,12 +99,6 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     private Object evaluate(Expr expr) {
         return expr.accept(this);
-    }
-
-    private boolean isTrue(Object object) {
-        if (object == null) return false;
-        if (object instanceof Boolean) return (boolean)object;
-        return true;
     }
 
     private boolean isTruthy(Object object) {
@@ -115,11 +112,6 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         if (a == null) return false;
 
         return a.equals(b);
-    }
-
-    private void checkNumberOperand(Token operator, Object operand) {
-        if (operand instanceof Double) return;
-        throw new RuntimeError(operator, "Operand must be a number.");
     }
 
     private void checkNumberOperands(Token operator, Object left, Object right) {
@@ -213,19 +205,40 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Object visitVariableExpr(Expr.Variable expr) {
-        return environment.get(expr.name);
+        return lookUpVariable(expr.name, expr);
     }
 
     @Override
     public Object visitAssignExpr(Expr.Assign expr) {
         Object value = evaluate(expr.value);
-        environment.assign(expr.name, value);
+
+        Integer distance = locals.get(expr);
+        if (distance != null) {
+            environment.assignAt(distance, expr.name, value);
+        } else {
+            globals.assign(expr.name, value);
+        }
+
         return value;
     }
 
     @Override
     public Void visitBlockStmt(Stmt.Block stmt) {
         executeBlock(stmt.statements, new Enviorment(environment));
+        return null;
+    }
+
+    @Override
+    public Void visitClassStmt(Stmt.Class stmt) {
+        environment.define(stmt.name.lexeme, null);
+        Map<String,  NeoFunc> methods = new HashMap<>();
+        for (Stmt.Function method : stmt.methods) {
+            NeoFunc function = new NeoFunc(method, environment,  method.name.lexeme.equals("init"));
+            methods.put(method.name.lexeme, function);
+        }
+
+        NeoClass klass = new NeoClass(stmt.name.lexeme, methods);
+        environment.assign(stmt.name, klass);
         return null;
     }
 
@@ -253,11 +266,28 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Object visitSetExpr(Expr.Set expr) {
+        Object object = evaluate(expr.object);
+
+        if (!(object instanceof NeoInstance)) throw new RuntimeError(expr.name, "Only instances have fields.");
+
+        Object value = evaluate(expr.value);
+        ((NeoInstance)object).set(expr.name, value);
+        return value;
+    }
+
+    @Override
+    public Object visitThisExpr(Expr.This expr) {
+        return lookUpVariable(expr.keyword, expr);
+    }
+
+    @Override
     public Object visitCallExpr(Expr.Call expr) {
         Object callee = evaluate(expr.callee);
         NeoCallable function = (NeoCallable)callee;
 
         List<Object> arguments = new ArrayList<>();
+
         for (Expr argument : expr.arguments) {
             arguments.add(evaluate(argument));
         }
@@ -273,11 +303,33 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         return function.call(this, arguments);
     }
 
+    @Override
+    public Object visitGetExpr(Expr.Get expr) {
+        Object object = evaluate(expr.object);
+        if (object instanceof NeoInstance) return ((NeoInstance) object).get(expr.name);
+
+
+        throw new RuntimeError(expr.name, "Only instances have properties.");
+    }
+
 
     @Override
     public Void visitFunctionStmt(Stmt.Function stmt) {
-        NeoFunc function = new NeoFunc(stmt, environment);
+        NeoFunc function = new NeoFunc(stmt, environment, false);
         environment.define(stmt.name.lexeme, function);
         return null;
+    }
+
+    public void resolve(Expr expr, int depth) {
+        locals.put(expr, depth);
+    }
+
+    private Object lookUpVariable(Token name, Expr expr) {
+        Integer distance = locals.get(expr);
+        if (distance != null) {
+            return environment.getAt(distance, name.lexeme);
+        } else {
+            return globals.get(name);
+        }
     }
 }
