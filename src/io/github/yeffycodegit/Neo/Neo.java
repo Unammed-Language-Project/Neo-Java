@@ -17,12 +17,23 @@ public class Neo {
     private static boolean showTokenTree = false;
 
     public static void main(String[] args) throws IOException {
-       runFile("C:\\Users\\aditc\\Desktop\\Y#\\src\\hehe.neo");
+        if (args.length > 1) {
+            System.out.println("Usage: neo [script path]");
+            System.exit(64);
+        } else if (args.length == 1) {
+            runFile(args[0]);
+        } else {
+            runPrompt();
+        }
     }
 
     private static void runFile(String path) throws IOException {
-        byte[] bytes = Files.readAllBytes(Paths.get(path)); // Convert the file provided into a list of bytes
-        run(new String(bytes, Charset.defaultCharset())); // Create a string with the bytes from the bytes array and pass it to the run method to run the program
+        try {
+            byte[] bytes = Files.readAllBytes(Paths.get(path)); // Convert the file provided into a list of bytes
+            run(new String(bytes, Charset.defaultCharset())); // Create a string with the bytes from the bytes array and pass it to the run method to run the program
+        } catch(Exception e) {
+            System.out.println(e);
+        }
 
         // Indicate an error in the exit code.
         if (hadError) System.exit(65);
@@ -35,7 +46,7 @@ public class Neo {
         BufferedReader reader = new BufferedReader(input);
 
         for (;;) {
-            System.out.print("> ");
+            System.out.print("$ >> ");
             String line = reader.readLine();
 
             if (line == null) break;
