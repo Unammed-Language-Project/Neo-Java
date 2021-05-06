@@ -44,7 +44,7 @@ public class Neo {
         BufferedReader reader = new BufferedReader(input);
 
         for (;;) {
-            System.out.print("$ >> ");
+            System.out.print("» ");
             String line = reader.readLine();
 
             if (line == null) break;

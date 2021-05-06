@@ -14,15 +14,15 @@ public class Lexer {
 
     static {
         keywords = new HashMap<>();
-        keywords.put("&&",    AND);
+        keywords.put("and",    AND);
         keywords.put("class",  CLASS);
         keywords.put("else",   ELSE);
         keywords.put("false",  FALSE);
         keywords.put("for",    FOR);
         keywords.put("func",    FUNC);
         keywords.put("if",     IF);
-        keywords.put("null",    NULL);
-        keywords.put("||",     OR);
+        keywords.put("nil",    NULL);
+        keywords.put("or",     OR);
         keywords.put("print",  PRINT);
         keywords.put("ret", RETURN);
         keywords.put("super",  SUPER);
@@ -30,7 +30,7 @@ public class Lexer {
         keywords.put("true",   TRUE);
         keywords.put("var",    VAR);
         keywords.put("while",  WHILE);
-        keywords.put("new", NEW);
+        keywords.put("derives", DERIVES);
     }
 
     private int start = 0;
@@ -170,9 +170,7 @@ public class Lexer {
         addToken(type);
     }
     private boolean isAlpha(char c) {
-        return (c >= 'a' && c <= 'z') ||
-                (c >= 'A' && c <= 'Z') ||
-                c == '_';
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
     }
     private boolean isAlphaNumeric(char c) {
         return isAlpha(c) || isDigit(c);

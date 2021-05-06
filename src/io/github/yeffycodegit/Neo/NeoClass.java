@@ -5,11 +5,13 @@ import java.util.Map;
 
 public class NeoClass implements NeoCallable {
     final String name;
+    final NeoClass superclass;
     private final Map<String, NeoFunc> methods;
 
-    NeoClass(String name, Map<String, NeoFunc> methods) {
+    NeoClass(String name, NeoClass superclass, Map<String, NeoFunc> methods) {
         this.name = name;
         this.methods = methods;
+        this.superclass = superclass;
     }
 
     @Override
@@ -25,9 +27,9 @@ public class NeoClass implements NeoCallable {
     }
 
     NeoFunc findMethod(String name) {
-        if (methods.containsKey(name)) {
-            return methods.get(name);
-        }
+        if (methods.containsKey(name)) return methods.get(name);
+
+        if (superclass != null) return superclass.findMethod(name);
 
         return null;
     }

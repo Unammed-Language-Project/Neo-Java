@@ -19,8 +19,17 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         NONE,
         FUNCTION,
         INITIALIZER,
-        METHOD;
+        METHOD,
+        SUBCLASS;
     }
+
+    private enum ClassType {
+        NONE,
+        CLASS,
+        SUBCLASS
+    }
+
+    private ClassType currentClass = ClassType.NONE;
 
     @Override
     public Void visitBlockStmt(Stmt.Block stmt) {
@@ -32,10 +41,27 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitClassStmt(Stmt.Class stmt) {
+        ClassType enclosingClass = currentClass;
+        currentClass = ClassType.CLASS;
+
         declare(stmt.name);
         define(stmt.name);
 
+        if (stmt.superclass != null && stmt.name.lexeme.equals(stmt.superclass.name.lexeme)) Neo.error(stmt.superclass.name.line, "A class can't derive from itself.");
+
+        if (stmt.superclass != null) {
+            currentClass = ClassType.SUBCLASS;
+            resolve(stmt.superclass);
+        }
+
+
+        if (stmt.superclass != null) {
+            beginScope();
+            scopes.peek().put("super", true);
+        }
+
         beginScope();
+
         scopes.peek().put("this", true);
 
         for (Stmt.Function method : stmt.methods) {
@@ -47,6 +73,8 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         }
 
         endScope();
+
+        if (stmt.superclass != null) endScope();
 
         return null;
     }
@@ -160,6 +188,14 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     public Void visitSetExpr(Expr.Set expr) {
         resolve(expr.value);
         resolve(expr.object);
+        return null;
+    }
+
+    @Override
+    public Void visitSuperExpr(Expr.Super expr) {
+        if (currentClass == ClassType.NONE) Neo.error(expr.keyword.line, "Can't use 'super' outside of a class.");
+        else if (currentClass != ClassType.SUBCLASS) Neo.error(expr.keyword.line, "Can't use 'super' in a class with no superclass.");
+        resolveLocal(expr, expr.keyword);
         return null;
     }
 
