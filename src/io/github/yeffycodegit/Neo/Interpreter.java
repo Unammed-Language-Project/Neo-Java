@@ -79,6 +79,9 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             case STAR:
                 checkNumberOperands(expr.operator, left, right);
                 return (double) left * (double) right;
+            case MODULO:
+                checkNumberOperands(expr.operator, left, right);
+                return (double) left % (double) right;
             case PLUS:
                 if (left instanceof Double && right instanceof Double) {
                     return (double) left + (double) right;
@@ -114,6 +117,10 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
                 return !isTruthy(right);
             case MINUS:
                 return -(double)right;
+            case INCREMENT:
+                return (double)right + 1;
+            case DECREMENT:
+                return (double)right - 1;
         }
 
         // Unreachable.
