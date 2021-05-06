@@ -14,7 +14,7 @@ public class Neo {
     private static boolean hadError;
     static boolean hadRuntimeError;
 
-    private static boolean showTokenTree = false;
+    private static boolean showTokenTree = true;
 
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
@@ -35,8 +35,6 @@ public class Neo {
             System.out.println(e);
         }
 
-        // Indicate an error in the exit code.
-        if (hadError) System.exit(65);
 
         runPrompt();
     }
@@ -95,14 +93,8 @@ public class Neo {
         Parser parser = new Parser(tokens);
         List<Stmt> statements = parser.parse();
 
-        // Stop if there was a syntax error
-        if (hadError) return;
-
         Resolver resolver = new Resolver(interpreter);
         resolver.resolve(statements);
-
-        // Stop if there was a resolution error.
-        if (hadError) return;
 
         interpreter.interpret(statements);
     }
