@@ -14,7 +14,7 @@ public class Neo {
     private static boolean hadError;
     static boolean hadRuntimeError;
 
-    private static boolean showTokenTree = true;
+    private static boolean showTokenTree = false;
 
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
