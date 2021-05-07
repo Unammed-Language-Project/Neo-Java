@@ -12,6 +12,7 @@ enum TokenTypes {
     GREATER, GREATER_EQUAL,
     LESS, LESS_EQUAL,
     INCREMENT, DECREMENT,
+    POW,
 
     // Literals.
     IDENTIFIER, STRING, NUMBER,

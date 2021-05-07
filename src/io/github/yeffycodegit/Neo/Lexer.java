@@ -65,7 +65,7 @@ public class Lexer {
             case '-': addToken(match('-') ? DECREMENT : MINUS); break;
             case '+': addToken(match('+') ? INCREMENT : PLUS); break;
             case ';': addToken(SEMICOLON); break;
-            case '*': addToken(STAR); break;
+            case '*': addToken(match('*') ? POW : STAR); break;
             case '!': addToken(match('=') ? BANG_EQUAL : BANG); break;
             case '=': addToken(match('=') ? EQUAL_EQUAL : EQUAL); break;
             case '<': addToken(match('=') ? LESS_EQUAL : LESS); break;
@@ -102,16 +102,20 @@ public class Lexer {
     private char advance() {
         return source.charAt(current++);
     }
+
     private void addToken(TokenTypes type) {
         addToken(type, null);
     }
+
     private void addToken(TokenTypes type, Object literal) {
         String text = source.substring(start, current);
         tokens.add(new Token(type, text, literal, line));
     }
+
     private boolean isAtEnd() {
         return current >= source.length();
     }
+
     private boolean match(char expected) {
         if (isAtEnd()) return false;
         if (source.charAt(current) != expected) return false;
@@ -119,10 +123,12 @@ public class Lexer {
         current++;
         return true;
     }
+
     private char peek() {
         if (isAtEnd()) return '\0';
         return source.charAt(current);
     }
+
     private void string() {
         while (peek() != '"' && !isAtEnd()) {
             if (peek() == '\n') line++;
@@ -141,9 +147,11 @@ public class Lexer {
         String value = source.substring(start + 1, current - 1);
         addToken(STRING, value);
     }
+
     private boolean isDigit(char c) {
         return c >= '0' && c <= '9';
     }
+
     private void number() {
         while (isDigit(peek())) advance();
 
@@ -157,10 +165,12 @@ public class Lexer {
 
         addToken(NUMBER, Double.parseDouble(source.substring(start, current)));
     }
+
     private char peekNext() {
         if (current + 1 >= source.length()) return '\0';
         return source.charAt(current + 1);
     }
+
     private void identifier() {
         while (isAlphaNumeric(peek())) advance();
 
@@ -169,9 +179,11 @@ public class Lexer {
         if (type == null) type = IDENTIFIER;
         addToken(type);
     }
+
     private boolean isAlpha(char c) {
         return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
     }
+
     private boolean isAlphaNumeric(char c) {
         return isAlpha(c) || isDigit(c);
     }

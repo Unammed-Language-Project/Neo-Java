@@ -46,6 +46,32 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             @Override
             public String toString() { return "<native fn>"; }
         });
+
+        globals.define("num", new NeoCallable() {
+            @Override
+            public int arity() { return 1; }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                return Double.parseDouble((String) arguments.get(0));
+            }
+
+            @Override
+            public String toString() { return "<native fn>"; }
+        });
+
+        globals.define("string", new NeoCallable() {
+            @Override
+            public int arity() { return 1; }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                return arguments.get(0).toString();
+            }
+
+            @Override
+            public String toString() { return "<native fn>"; }
+        });
     }
 
     @Override
@@ -82,6 +108,9 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             case MODULO:
                 checkNumberOperands(expr.operator, left, right);
                 return (double) left % (double) right;
+            case POW:
+                checkNumberOperands(expr.operator, left, right);
+                return Math.pow((double)left, (double)right);
             case PLUS:
                 if (left instanceof Double && right instanceof Double) {
                     return (double) left + (double) right;
